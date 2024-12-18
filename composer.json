@@ -3,7 +3,7 @@
     "description": "Codeception module with REST steps in Gherkin format.",
     "license": "MIT",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "keywords": [
         "codeception",
         "dev",

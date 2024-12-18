@@ -71,28 +71,24 @@ EOF;
 
     /**
      * Sends an HTTP request.
-     * `Content-Type` header is sent with `application/json`.
      *
      * ```gherkin
-     * When I send a "GET" request to "/users" as JSON
+     * When I send a "GET" request to "/users"
      * ```
      *
-     * @Given /^I send a "([^"]*)" request to "([^"]*)" as JSON$/
-     * @When /^I send a "([^"]*)" request to "([^"]*)" as JSON$/
+     * @Given /^I send a "([^"]*)" request to "([^"]*)"$/
+     * @When /^I send a "([^"]*)" request to "([^"]*)"$/
      */
-    public function stepSendHttpRequestAsJson(string $method, string $url): void
+    public function stepSendHttpRequest(string $method, string $url): void
     {
-        $this->restModule->haveHttpHeader('Content-Type', 'application/json');
         $this->restModule->send($method, $url);
-        $this->restModule->unsetHttpHeader('Content-Type');
     }
 
     /**
      * Sends an HTTP request with body and headers.
-     * `Content-Type` header is sent with `application/json`.
      *
      * ```gherkin
-     *  When I send a "POST" request to "/users" as JSON with:
+     *  When I send a "POST" request to "/users" with:
      *      """
      *      {
      *          headers: {
@@ -105,31 +101,29 @@ EOF;
      *      """
      *  ```
      *
-     * @Given /^I send a "([^"]*)" request to "([^"]*)" as JSON with:(.*)$/
-     * @When /^I send a "([^"]*)" request to "([^"]*)" as JSON with:(.*)$/
+     * @Given /^I send a "([^"]*)" request to "([^"]*)" with:(.*)$/
+     * @When /^I send a "([^"]*)" request to "([^"]*)" with:(.*)$/
      */
-    public function stepSendHttpRequestAsJsonWithBodyAndHeaders(string $method, string $url, PyStringNode $node): void
+    public function stepSendHttpRequestWithBodyAndHeaders(string $method, string $url, PyStringNode $node): void
     {
         $request = json_decode($node->getRaw(), true, flags: \JSON_THROW_ON_ERROR);
         $encodedRequest = $this->buildEncodedRequest($request);
-        $this->sendHttpRequestAsJsonWithBodyAndHeaders($method, $url, $encodedRequest);
+        $this->sendHttpRequestWithBodyAndHeaders($method, $url, $encodedRequest);
     }
 
     /**
      * @param array<mixed> $request
      */
-    public function sendHttpRequestAsJsonWithBodyAndHeaders(string $method, string $url, array $request): void
+    public function sendHttpRequestWithBodyAndHeaders(string $method, string $url, array $request): void
     {
         $request = $this->buildEncodedRequest($request);
 
-        $this->restModule->haveHttpHeader('Content-Type', 'application/json');
         foreach ($request['headers'] as $key => $value) {
             $this->restModule->haveHttpHeader($key, $value);
         }
 
         $this->restModule->send($method, $url, $this->extractParams($method, $request));
 
-        $this->restModule->unsetHttpHeader('Content-Type');
         foreach ($request['headers'] as $key => $value) {
             $this->restModule->unsetHttpHeader($key);
         }
