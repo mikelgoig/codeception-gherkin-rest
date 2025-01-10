@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Codeception\Module\Gherkin;
+namespace MikelGoig\Codeception\Module;
 
 use Behat\Gherkin\Node\PyStringNode;
 use Codeception\Lib\Interfaces\DependsOnModule;
+use Codeception\Lib\Interfaces\PartedModule;
 use Codeception\Module;
 use Codeception\Module\REST as RestModule;
 use JetBrains\PhpStorm\NoReturn;
@@ -18,25 +19,19 @@ use JetBrains\PhpStorm\NoReturn;
  *     query: array<string, string>,
  * }
  */
-class REST extends Module implements DependsOnModule
+class Rest extends Module implements DependsOnModule, PartedModule
 {
     protected RestModule $restModule;
-    protected string $multipartBoundary;
+    protected ?string $multipartBoundary;
     protected string $dependencyMessage = <<<EOF
-Example configuring Gherkin\REST module:
+Example configuring module:
 --
 modules:
     enabled:
-        - Gherkin\REST:
-            depends: [REST]
-            multipart_boundary: foo
+        - MikelGoig\Codeception\Module\Rest:
+            depends: REST
 --
 EOF;
-
-    public function _initialize(): void
-    {
-        $this->multipartBoundary = $this->config['multipart_boundary'];
-    }
 
     /**
      * @return array<class-string, string>
@@ -48,10 +43,76 @@ EOF;
         ];
     }
 
+    public function _parts(): array
+    {
+        return ['gherkin'];
+    }
+
     public function _inject(RestModule $restModule): void
     {
         $this->restModule = $restModule;
     }
+
+    public function _initialize(): void
+    {
+        $this->multipartBoundary = $this->config['multipart_boundary'] ?? null;
+    }
+
+    /**
+     * Sends an HTTP request with body and headers.
+     *
+     * @param array<mixed> $request
+     */
+    public function sendHttpRequestWithBodyAndHeaders(string $method, string $url, array $request): void
+    {
+        $request = $this->buildEncodedRequest($request);
+
+        foreach ($request['headers'] as $key => $value) {
+            $this->restModule->haveHttpHeader($key, $value);
+        }
+
+        $this->restModule->send($method, $url, $this->extractParams($method, $request));
+
+        foreach ($request['headers'] as $key => $value) {
+            $this->restModule->unsetHttpHeader($key);
+        }
+    }
+
+    /**
+     * Sends an HTTP request with files.
+     * `Content-Type` header is sent with `multipart/form-data`.
+     *
+     * @param array<mixed> $request
+     */
+    public function sendHttpRequestAsFormWithFiles(string $method, string $url, array $request): void
+    {
+        if ($this->multipartBoundary === null) {
+            throw new \RuntimeException('Multipart boundary is not set. Please set it in config.');
+        }
+
+        $request = $this->buildEncodedRequest($request);
+
+        $this->restModule->haveHttpHeader('Content-Type', 'multipart/form-data; boundary=' . $this->multipartBoundary);
+        foreach ($request['headers'] as $key => $value) {
+            $this->restModule->haveHttpHeader($key, $value);
+        }
+
+        $this->restModule->send(
+            $method,
+            $url,
+            $this->extractParams($method, $request),
+            $this->extractFiles($request),
+        );
+
+        $this->restModule->unsetHttpHeader('Content-Type');
+        foreach ($request['headers'] as $key => $value) {
+            $this->restModule->unsetHttpHeader($key);
+        }
+    }
+
+    #--------------------------------------------------------------------------
+    # Gherkin Steps
+    #--------------------------------------------------------------------------
 
     /**
      * Sets an HTTP header to be used for all subsequent requests.
@@ -63,6 +124,9 @@ EOF;
      *
      * @Given /^I have a(?:n)? "([^"]*)" header set to "([^"]*)"$/
      * @When /^I have a(?:n)? "([^"]*)" header set to "([^"]*)"$/
+     *
+     * @part gherkin
+     * @see RestModule::haveHttpHeader()
      */
     public function stepHaveHttpHeader(string $name, string $value): void
     {
@@ -78,6 +142,9 @@ EOF;
      *
      * @Given /^I send a "([^"]*)" request to "([^"]*)"$/
      * @When /^I send a "([^"]*)" request to "([^"]*)"$/
+     *
+     * @part gherkin
+     * @see RestModule::send()
      */
     public function stepSendHttpRequest(string $method, string $url): void
     {
@@ -103,30 +170,15 @@ EOF;
      *
      * @Given /^I send a "([^"]*)" request to "([^"]*)" with:(.*)$/
      * @When /^I send a "([^"]*)" request to "([^"]*)" with:(.*)$/
+     *
+     * @part gherkin
+     * @see self::sendHttpRequestWithBodyAndHeaders()
      */
     public function stepSendHttpRequestWithBodyAndHeaders(string $method, string $url, PyStringNode $node): void
     {
         $request = json_decode($node->getRaw(), true, flags: \JSON_THROW_ON_ERROR);
         $encodedRequest = $this->buildEncodedRequest($request);
         $this->sendHttpRequestWithBodyAndHeaders($method, $url, $encodedRequest);
-    }
-
-    /**
-     * @param array<mixed> $request
-     */
-    public function sendHttpRequestWithBodyAndHeaders(string $method, string $url, array $request): void
-    {
-        $request = $this->buildEncodedRequest($request);
-
-        foreach ($request['headers'] as $key => $value) {
-            $this->restModule->haveHttpHeader($key, $value);
-        }
-
-        $this->restModule->send($method, $url, $this->extractParams($method, $request));
-
-        foreach ($request['headers'] as $key => $value) {
-            $this->restModule->unsetHttpHeader($key);
-        }
     }
 
     /**
@@ -152,6 +204,9 @@ EOF;
      *
      * @Given /^I send a "([^"]*)" request to "([^"]*)" as FORM with:(.*)$/
      * @When /^I send a "([^"]*)" request to "([^"]*)" as FORM with:(.*)$/
+     *
+     * @part gherkin
+     * @see self::sendHttpRequestAsFormWithFiles()
      */
     public function stepSendHttpRequestAsFormWithFiles(string $method, string $url, PyStringNode $node): void
     {
@@ -161,34 +216,12 @@ EOF;
     }
 
     /**
-     * @param array<mixed> $request
-     */
-    public function sendHttpRequestAsFormWithFiles(string $method, string $url, array $request): void
-    {
-        $request = $this->buildEncodedRequest($request);
-
-        $this->restModule->haveHttpHeader('Content-Type', 'multipart/form-data; boundary=' . $this->multipartBoundary);
-        foreach ($request['headers'] as $key => $value) {
-            $this->restModule->haveHttpHeader($key, $value);
-        }
-
-        $this->restModule->send(
-            $method,
-            $url,
-            $this->extractParams($method, $request),
-            $this->extractFiles($request),
-        );
-
-        $this->restModule->unsetHttpHeader('Content-Type');
-        foreach ($request['headers'] as $key => $value) {
-            $this->restModule->unsetHttpHeader($key);
-        }
-    }
-
-    /**
      * Checks that response code is equal to provided value.
      *
      * @Then /^I should receive a "([^"]*)" response code$/
+     *
+     * @part gherkin
+     * @see RestModule::seeResponseCodeIs()
      */
     public function stepSeeResponseCodeIs(string $expected): void
     {
@@ -199,6 +232,9 @@ EOF;
      * Checks that response code is 2xx.
      *
      * @Then /^I should receive a successful response code$/
+     *
+     * @part gherkin
+     * @see RestModule::seeResponseCodeIsSuccessful()
      */
     public function stepSeeResponseCodeIsSuccessful(): void
     {
@@ -209,6 +245,8 @@ EOF;
      * Checks that response is empty.
      *
      * @Then /^I should receive an empty response$/
+     *
+     * @part gherkin
      */
     public function stepSeeResponseIsEmpty(): void
     {
@@ -219,6 +257,9 @@ EOF;
      * Checks whether the last JSON response contains the provided array.
      *
      * @Then /^I should receive a JSON response that contains:(.*)$/
+     *
+     * @part gherkin
+     * @see RestModule::seeResponseContainsJson()
      */
     public function stepSeeResponseContainsJson(PyStringNode $node): void
     {
@@ -232,6 +273,9 @@ EOF;
      * @Given /^I print last response$/
      * @When /^I print last response$/
      * @Then /^I print last response$/
+     *
+     * @part gherkin
+     * @see RestModule::grabResponse()
      */
     #[NoReturn] public function stepPrintLastResponse(): void
     {
@@ -246,6 +290,9 @@ EOF;
      * @Given /^I print last response as JSON$/
      * @When /^I print last response as JSON$/
      * @Then /^I print last response as JSON$/
+     *
+     * @part gherkin
+     * @see RestModule::grabResponse()
      */
     #[NoReturn] public function stepPrintLastResponseAsJson(): void
     {
@@ -254,11 +301,13 @@ EOF;
         exit();
     }
 
+    #--------------------------------------------------------------------------
+
     /**
      * @param array<mixed> $request
      * @return TEncodedRequest
      */
-    private function buildEncodedRequest(array $request): array
+    protected function buildEncodedRequest(array $request): array
     {
         if (isset($request['body'])) {
             \assert(is_array($request['body']));
@@ -288,7 +337,7 @@ EOF;
      * @param TEncodedRequest $encodedRequest
      * @return array<string, string>|string
      */
-    private function extractParams(string $method, array $encodedRequest): array|string
+    protected function extractParams(string $method, array $encodedRequest): array|string
     {
         if ($method === 'GET') {
             return $encodedRequest['query'];
@@ -305,7 +354,7 @@ EOF;
      * @param TEncodedRequest $encodedRequest
      * @return array<string, string>
      */
-    private function extractFiles(array $encodedRequest): array
+    protected function extractFiles(array $encodedRequest): array
     {
         return array_map(fn(string $filename) => codecept_data_dir($filename), $encodedRequest['files']);
     }

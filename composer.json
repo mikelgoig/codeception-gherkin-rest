@@ -1,14 +1,15 @@
 {
-    "name": "mikelgoig/codeception-gherkin-rest",
-    "description": "Codeception module with REST steps in Gherkin format.",
+    "name": "mikelgoig/codeception-rest",
+    "description": "Codeception module for testing REST services.",
     "license": "MIT",
     "type": "library",
-    "version": "1.1.0",
+    "version": "2.0.0",
     "keywords": [
         "codeception",
         "dev",
         "gherkin",
-        "rest"
+        "rest",
+        "testing"
     ],
     "authors": [
         {
@@ -23,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Codeception\\": "src/"
+            "MikelGoig\\Codeception\\Module\\": "src/"
         }
     },
     "minimum-stability": "stable",
