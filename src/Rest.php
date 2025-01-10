@@ -62,6 +62,8 @@ EOF;
      * Sends an HTTP request with body and headers.
      *
      * @param array<mixed> $request
+     *
+     * @part gherkin
      */
     public function sendHttpRequestWithBodyAndHeaders(string $method, string $url, array $request): void
     {
@@ -83,6 +85,8 @@ EOF;
      * `Content-Type` header is sent with `multipart/form-data`.
      *
      * @param array<mixed> $request
+     *
+     * @part gherkin
      */
     public function sendHttpRequestAsFormWithFiles(string $method, string $url, array $request): void
     {
