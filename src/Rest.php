@@ -59,7 +59,7 @@ EOF;
     }
 
     /**
-     * Sends an HTTP request with body and headers.
+     * Send an HTTP request with body and headers.
      *
      * @param array<mixed> $request
      *
@@ -81,7 +81,7 @@ EOF;
     }
 
     /**
-     * Sends an HTTP request with files.
+     * Send an HTTP request with files.
      * `Content-Type` header is sent with `multipart/form-data`.
      *
      * @param array<mixed> $request
@@ -119,18 +119,17 @@ EOF;
     #--------------------------------------------------------------------------
 
     /**
-     * Sets an HTTP header to be used for all subsequent requests.
+     * Set an HTTP header to be used for all subsequent requests.
      *
      * ```gherkin
-     * Given I have a "Content-Type" header set to "application/json"
+     * Given the "Content-Type" request header is "application/json"
      * // all next requests will contain this header
      * ```
      *
-     * @Given /^I have a(?:n)? "([^"]*)" header set to "([^"]*)"$/
-     * @When /^I have a(?:n)? "([^"]*)" header set to "([^"]*)"$/
+     * @Given /^the "([^"]*)" request header is "([^"]*)"$/
+     * @When /^the "([^"]*)" request header is "([^"]*)"$/
      *
      * @part gherkin
-     * @see RestModule::haveHttpHeader()
      */
     public function stepHaveHttpHeader(string $name, string $value): void
     {
@@ -138,7 +137,7 @@ EOF;
     }
 
     /**
-     * Sends an HTTP request.
+     * Send an HTTP request.
      *
      * ```gherkin
      * When I send a "GET" request to "/users"
@@ -148,7 +147,6 @@ EOF;
      * @When /^I send a "([^"]*)" request to "([^"]*)"$/
      *
      * @part gherkin
-     * @see RestModule::send()
      */
     public function stepSendHttpRequest(string $method, string $url): void
     {
@@ -156,7 +154,7 @@ EOF;
     }
 
     /**
-     * Sends an HTTP request with body and headers.
+     * Send an HTTP request with body and headers.
      *
      * ```gherkin
      *  When I send a "POST" request to "/users" with:
@@ -176,7 +174,6 @@ EOF;
      * @When /^I send a "([^"]*)" request to "([^"]*)" with:(.*)$/
      *
      * @part gherkin
-     * @see self::sendHttpRequestWithBodyAndHeaders()
      */
     public function stepSendHttpRequestWithBodyAndHeaders(string $method, string $url, PyStringNode $node): void
     {
@@ -186,7 +183,7 @@ EOF;
     }
 
     /**
-     * Sends an HTTP request with files.
+     * Send an HTTP request with files.
      * `Content-Type` header is sent with `multipart/form-data`.
      *
      * ```gherkin
@@ -210,7 +207,6 @@ EOF;
      * @When /^I send a "([^"]*)" request to "([^"]*)" as FORM with:(.*)$/
      *
      * @part gherkin
-     * @see self::sendHttpRequestAsFormWithFiles()
      */
     public function stepSendHttpRequestAsFormWithFiles(string $method, string $url, PyStringNode $node): void
     {
@@ -220,12 +216,11 @@ EOF;
     }
 
     /**
-     * Checks that response code is equal to provided value.
+     * Check that response code is equal to provided value.
      *
-     * @Then /^I should receive a "([^"]*)" response code$/
+     * @Then /^the response code is "([^"]*)"$/
      *
      * @part gherkin
-     * @see RestModule::seeResponseCodeIs()
      */
     public function stepSeeResponseCodeIs(string $expected): void
     {
@@ -233,12 +228,11 @@ EOF;
     }
 
     /**
-     * Checks that response code is 2xx.
+     * Check that response code is 2xx.
      *
-     * @Then /^I should receive a successful response code$/
+     * @Then /^the response is successful$/
      *
      * @part gherkin
-     * @see RestModule::seeResponseCodeIsSuccessful()
      */
     public function stepSeeResponseCodeIsSuccessful(): void
     {
@@ -246,9 +240,33 @@ EOF;
     }
 
     /**
-     * Checks that response is empty.
+     * Check that the response header exists.
      *
-     * @Then /^I should receive an empty response$/
+     * @Then /^the "([^"]*)" response header exists$/
+     *
+     * @part gherkin
+     */
+    public function stepSeeHttpHeaderExists(string $name): void
+    {
+        $this->restModule->seeHttpHeader($name);
+    }
+
+    /**
+     * Check that the value of the response header equals the provided value.
+     *
+     * @Then /^the "([^"]*)" response header is "([^"]*)"$/
+     *
+     * @part gherkin
+     */
+    public function stepSeeHttpHeaderIs(string $name, $value): void
+    {
+        $this->restModule->seeHttpHeader($name, $value);
+    }
+
+    /**
+     * Check that response is empty.
+     *
+     * @Then /^the response body is empty$/
      *
      * @part gherkin
      */
@@ -258,12 +276,11 @@ EOF;
     }
 
     /**
-     * Checks whether the last JSON response contains the provided array.
+     * Check whether the last JSON response contains the provided array.
      *
-     * @Then /^I should receive a JSON response that contains:(.*)$/
+     * @Then /^the response body contains JSON:(.*)$/
      *
      * @part gherkin
-     * @see RestModule::seeResponseContainsJson()
      */
     public function stepSeeResponseContainsJson(PyStringNode $node): void
     {
@@ -272,14 +289,11 @@ EOF;
     }
 
     /**
-     * Prints last response.
+     * Print last response.
      *
-     * @Given /^I print last response$/
-     * @When /^I print last response$/
-     * @Then /^I print last response$/
+     * @Then /^print last response$/
      *
      * @part gherkin
-     * @see RestModule::grabResponse()
      */
     #[NoReturn] public function stepPrintLastResponse(): void
     {
@@ -289,14 +303,11 @@ EOF;
     }
 
     /**
-     * Prints last response as JSON.
+     * Print last response as JSON.
      *
-     * @Given /^I print last response as JSON$/
-     * @When /^I print last response as JSON$/
-     * @Then /^I print last response as JSON$/
+     * @Then /^print last response as JSON$/
      *
      * @part gherkin
-     * @see RestModule::grabResponse()
      */
     #[NoReturn] public function stepPrintLastResponseAsJson(): void
     {
