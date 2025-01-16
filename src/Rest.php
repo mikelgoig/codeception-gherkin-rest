@@ -9,7 +9,10 @@ use Codeception\Lib\Interfaces\DependsOnModule;
 use Codeception\Lib\Interfaces\PartedModule;
 use Codeception\Module;
 use Codeception\Module\REST as RestModule;
+use Codeception\Util\JsonArray;
+use Coduo\PHPMatcher\PHPUnit\PHPMatcherConstraint;
 use JetBrains\PhpStorm\NoReturn;
+use PHPUnit\Framework\Assert;
 
 /**
  * @phpstan-type TEncodedRequest array{
@@ -177,7 +180,7 @@ EOF;
      */
     public function stepSendHttpRequestWithBodyAndHeaders(string $method, string $url, PyStringNode $node): void
     {
-        $request = json_decode($node->getRaw(), true, flags: \JSON_THROW_ON_ERROR);
+        $request = (new JsonArray($node->getRaw()))->toArray();
         $encodedRequest = $this->buildEncodedRequest($request);
         $this->sendHttpRequestWithBodyAndHeaders($method, $url, $encodedRequest);
     }
@@ -210,7 +213,7 @@ EOF;
      */
     public function stepSendHttpRequestAsFormWithFiles(string $method, string $url, PyStringNode $node): void
     {
-        $request = json_decode($node->getRaw(), true, flags: \JSON_THROW_ON_ERROR);
+        $request = (new JsonArray($node->getRaw()))->toArray();
         $encodedRequest = $this->buildEncodedRequest($request);
         $this->sendHttpRequestAsFormWithFiles($method, $url, $encodedRequest);
     }
@@ -284,8 +287,23 @@ EOF;
      */
     public function stepSeeResponseContainsJson(PyStringNode $node): void
     {
-        $json = \json_decode($node->getRaw(), true, flags: \JSON_THROW_ON_ERROR);
+        $json = (new JsonArray($node->getRaw()))->toArray();
         $this->restModule->seeResponseContainsJson($json);
+    }
+
+    /**
+     * Check whether the last JSON response matches the provided array.
+     * See https://github.com/coduo/php-matcher
+     *
+     * @Then /^the response body matches JSON:(.*)$/
+     *
+     * @part gherkin
+     */
+    public function stepSeeResponseMatchesJson(PyStringNode $node): void
+    {
+        $response = (new JsonArray($this->restModule->grabResponse()))->toArray();
+        $pattern = (new JsonArray($node->getRaw()))->toArray();
+        Assert::assertThat($response, new PHPMatcherConstraint($pattern));
     }
 
     /**
@@ -312,7 +330,7 @@ EOF;
     #[NoReturn] public function stepPrintLastResponseAsJson(): void
     {
         echo PHP_EOL;
-        print_r(json_decode($this->restModule->grabResponse(), true, flags: \JSON_THROW_ON_ERROR));
+        print_r((new JsonArray($this->restModule->grabResponse()))->toArray());
         exit();
     }
 
