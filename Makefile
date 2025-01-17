@@ -37,8 +37,8 @@ phpstan: ## Run PHPStan and show errors
 	@$(eval c ?=)
 	@$(PHP) vendor/bin/phpstan analyse --memory-limit=-1 $(c)
 
-.PHONY: phpstan-cache-clear
-phpstan-cache-clear: ## Clear PHPStan cache
+.PHONY: phpstan-cc
+phpstan-cc: ## Clear PHPStan cache
 	@rm -rf var/cache/phpstan
 
 .PHONY: ecs
