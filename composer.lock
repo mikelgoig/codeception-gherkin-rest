@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "23e3b5ed21235a9d98b8a49cc89015bd",
+    "content-hash": "db1f62ea964f9232c345eb2ad6f26f5e",
     "packages": [
         {
             "name": "aeon-php/calendar",
@@ -4971,21 +4971,26 @@
         },
         {
             "name": "mikelgoig/easy-coding-standard-rules",
-            "version": "1.0.1",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mikelgoig/easy-coding-standard-rules.git",
-                "reference": "6cef6d80ee6fb86d6be34cb9088fda808e05e54f"
+                "reference": "2cefa3f7f7400f5aade362d06b4801547961b824"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mikelgoig/easy-coding-standard-rules/zipball/6cef6d80ee6fb86d6be34cb9088fda808e05e54f",
-                "reference": "6cef6d80ee6fb86d6be34cb9088fda808e05e54f",
+                "url": "https://api.github.com/repos/mikelgoig/easy-coding-standard-rules/zipball/2cefa3f7f7400f5aade362d06b4801547961b824",
+                "reference": "2cefa3f7f7400f5aade362d06b4801547961b824",
                 "shasum": ""
             },
             "require": {
                 "php": "8.3.*",
                 "symplify/easy-coding-standard": "^12.5"
+            },
+            "require-dev": {
+                "captainhook/captainhook-phar": "^5.24",
+                "captainhook/hook-installer": "^1.0",
+                "ramsey/conventional-commits": "^1.5"
             },
             "type": "library",
             "autoload": {
@@ -5014,9 +5019,9 @@
                 "static-analysis"
             ],
             "support": {
-                "source": "https://github.com/mikelgoig/easy-coding-standard-rules/tree/v1.0.1"
+                "source": "https://github.com/mikelgoig/easy-coding-standard-rules/tree/v1.1.0"
             },
-            "time": "2025-01-17T12:02:32+00:00"
+            "time": "2025-01-17T13:17:05+00:00"
         },
         {
             "name": "opis/json-schema",

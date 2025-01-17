@@ -28,7 +28,7 @@
         "captainhook/captainhook-phar": "^5.24",
         "captainhook/hook-installer": "^1.0",
         "jetbrains/phpstorm-attributes": "^1.2",
-        "mikelgoig/easy-coding-standard-rules": "^1.0",
+        "mikelgoig/easy-coding-standard-rules": "^1.1",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
