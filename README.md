@@ -14,9 +14,9 @@ Created by <a href="https://mikelgoig.com">Mikel Goig</a>.
 
 ---
 
-![Packagist Version](https://img.shields.io/packagist/v/mikelgoig/codeception-rest)
-![Packagist Downloads](https://img.shields.io/packagist/dt/mikelgoig/codeception-rest)
-![Packagist PHP Version](https://img.shields.io/packagist/dependency-v/mikelgoig/codeception-rest/php)
+[![Packagist Version](https://img.shields.io/packagist/v/mikelgoig/codeception-rest)](https://packagist.org/packages/mikelgoig/codeception-rest)
+[![Packagist Downloads](https://img.shields.io/packagist/dt/mikelgoig/codeception-rest)](https://packagist.org/packages/mikelgoig/codeception-rest/stats)
+[![Packagist PHP Version](https://img.shields.io/packagist/dependency-v/mikelgoig/codeception-rest/php)](https://thephp.foundation)
 
 **This Codeception module provides you with actions for testing REST services.**
 
