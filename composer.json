@@ -24,7 +24,10 @@
         "coduo/php-matcher": "^6.0"
     },
     "require-dev": {
+        "captainhook/captainhook-phar": "^5.24",
+        "captainhook/hook-installer": "^1.0",
         "mikelgoig/easy-coding-standard-rules": "^1.0",
+        "ramsey/conventional-commits": "^1.5",
         "symplify/easy-coding-standard": "^12.5"
     },
     "autoload": {
@@ -35,7 +38,11 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "captainhook/captainhook-phar": true,
+            "captainhook/hook-installer": true
+        }
     },
     "scripts": {
         "ecs": "vendor/bin/ecs check --ansi",
