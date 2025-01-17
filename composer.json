@@ -21,12 +21,19 @@
         "php": "8.3.*",
         "codeception/codeception": "^5.1",
         "codeception/module-rest": "^3.4",
-        "coduo/php-matcher": "^6.0"
+        "coduo/php-matcher": "^6.0",
+        "webmozart/assert": "^1.11"
     },
     "require-dev": {
         "captainhook/captainhook-phar": "^5.24",
         "captainhook/hook-installer": "^1.0",
+        "jetbrains/phpstorm-attributes": "^1.2",
         "mikelgoig/easy-coding-standard-rules": "^1.0",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpstan/phpstan-webmozart-assert": "^2.0",
         "ramsey/conventional-commits": "^1.5",
         "symplify/easy-coding-standard": "^12.5"
     },
@@ -38,14 +45,18 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "config": {
-        "sort-packages": true,
         "allow-plugins": {
             "captainhook/captainhook-phar": true,
-            "captainhook/hook-installer": true
-        }
+            "captainhook/hook-installer": true,
+            "phpstan/extension-installer": true
+        },
+        "sort-packages": true
     },
-    "scripts": {
-        "ecs": "vendor/bin/ecs check --ansi",
-        "ecs-fix": "vendor/bin/ecs check --fix --ansi"
+    "extra": {
+        "phpstan": {
+            "includes": [
+                "extension.neon"
+            ]
+        }
     }
 }

@@ -12,7 +12,8 @@ use Codeception\Module\REST as RestModule;
 use Codeception\Util\JsonArray;
 use Coduo\PHPMatcher\PHPUnit\PHPMatcherConstraint;
 use JetBrains\PhpStorm\NoReturn;
-use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Assert as TestAssert;
+use Webmozart\Assert\Assert;
 
 /**
  * @phpstan-type TEncodedRequest array{
@@ -24,6 +25,10 @@ use PHPUnit\Framework\Assert;
  */
 class Rest extends Module implements DependsOnModule, PartedModule
 {
+    protected array $config = [
+        'multipart_boundary' => null,
+    ];
+
     protected RestModule $restModule;
     protected ?string $multipartBoundary;
     protected string $dependencyMessage = <<<EOF
@@ -36,9 +41,6 @@ modules:
 --
 EOF;
 
-    /**
-     * @return array<class-string, string>
-     */
     public function _depends(): array
     {
         return [
@@ -58,7 +60,8 @@ EOF;
 
     public function _initialize(): void
     {
-        $this->multipartBoundary = $this->config['multipart_boundary'] ?? null;
+        Assert::nullOrString($this->config['multipart_boundary']);
+        $this->multipartBoundary = $this->config['multipart_boundary'];
     }
 
     /**
@@ -261,7 +264,7 @@ EOF;
      *
      * @part gherkin
      */
-    public function stepSeeHttpHeaderIs(string $name, $value): void
+    public function stepSeeHttpHeaderIs(string $name, mixed $value): void
     {
         $this->restModule->seeHttpHeader($name, $value);
     }
@@ -303,7 +306,7 @@ EOF;
     {
         $response = (new JsonArray($this->restModule->grabResponse()))->toArray();
         $pattern = (new JsonArray($node->getRaw()))->toArray();
-        Assert::assertThat($response, new PHPMatcherConstraint($pattern));
+        TestAssert::assertThat($response, new PHPMatcherConstraint($pattern));
     }
 
     /**
@@ -342,27 +345,11 @@ EOF;
      */
     protected function buildEncodedRequest(array $request): array
     {
-        if (isset($request['body'])) {
-            \assert(is_array($request['body']));
-        }
-
-        if (isset($request['files'])) {
-            \assert(is_array($request['files']));
-        }
-
-        if (isset($request['headers'])) {
-            \assert(is_array($request['headers']));
-        }
-
-        if (isset($request['query'])) {
-            \assert(is_array($request['query']));
-        }
-
         return [
-            'body' => $request['body'] ?? [],
-            'files' => $request['files'] ?? [],
-            'headers' => $request['headers'] ?? [],
-            'query' => $request['query'] ?? [],
+            'body' => $this->assertStringArray($request['body'] ?? []),
+            'files' => $this->assertStringArray($request['files'] ?? []),
+            'headers' => $this->assertStringArray($request['headers'] ?? []),
+            'query' => $this->assertStringArray($request['query'] ?? []),
         ];
     }
 
@@ -389,6 +376,22 @@ EOF;
      */
     protected function extractFiles(array $encodedRequest): array
     {
-        return array_map(fn (string $filename) => codecept_data_dir($filename), $encodedRequest['files']);
+        return array_map(function (string $filename) {
+            $filepath = codecept_data_dir($filename);
+            Assert::string($filepath, 'File path is not a string.');
+            return $filepath;
+        }, $encodedRequest['files']);
+    }
+
+    /**
+     * Check that an array is associative and has strings as keys and values.
+     *
+     * @return array<string, string>
+     */
+    private function assertStringArray(mixed $data): array
+    {
+        Assert::isMap($data, 'Expected all keys to be strings.');
+        Assert::allString($data, 'Expected all values to be strings.');
+        return $data;
     }
 }
