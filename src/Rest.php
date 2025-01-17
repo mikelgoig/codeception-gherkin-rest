@@ -389,6 +389,6 @@ EOF;
      */
     protected function extractFiles(array $encodedRequest): array
     {
-        return array_map(fn(string $filename) => codecept_data_dir($filename), $encodedRequest['files']);
+        return array_map(fn (string $filename) => codecept_data_dir($filename), $encodedRequest['files']);
     }
 }
