@@ -51,12 +51,5 @@
             "phpstan/extension-installer": true
         },
         "sort-packages": true
-    },
-    "extra": {
-        "phpstan": {
-            "includes": [
-                "extension.neon"
-            ]
-        }
     }
 }
