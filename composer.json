@@ -3,7 +3,7 @@
     "description": "Codeception module for testing REST services.",
     "license": "MIT",
     "type": "library",
-    "version": "3.3.0",
+    "version": "3.3.1",
     "keywords": [
         "codeception",
         "dev",
